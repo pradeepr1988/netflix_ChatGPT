@@ -1,5 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { ValidateSignInForm } from '../utils/validate';
+import { auth } from '../utils/firebase';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth';
 
 const Form = () => {
   const [showSignUpForm, setShowSignUpForm] = useState(false);
@@ -7,17 +12,62 @@ const Form = () => {
 
   const email = useRef(null);
   const password = useRef(null);
+  const confirmPassword = useRef(null);
 
   const toggleSignForm = () => {
     setShowSignUpForm(!showSignUpForm);
   };
 
   const handleClick = () => {
-    const validationMessage = ValidateSignInForm(
-      email.current.value,
-      password.current.value
-    );
+    let validationMessage;
+    if (showSignUpForm) {
+      validationMessage = ValidateSignInForm(
+        email.current.value,
+        password.current.value,
+        confirmPassword.current.value
+      );
+    } else {
+      validationMessage = ValidateSignInForm(
+        email.current.value,
+        password.current.value
+      );
+    }
+
     setErrorMessage(validationMessage);
+
+    if (validationMessage) return;
+
+    if (!showSignUpForm) {
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(`${errorCode} - ${errorMessage}`);
+        });
+    } else {
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(`${errorCode} - ${errorMessage}`);
+        });
+    }
   };
 
   return (
@@ -44,6 +94,7 @@ const Form = () => {
       />
       {showSignUpForm && (
         <input
+          ref={confirmPassword}
           type="password"
           placeholder="Confirm your Password"
           className="p-4 my-4 w-full bg-gray-700  rounded-lg"

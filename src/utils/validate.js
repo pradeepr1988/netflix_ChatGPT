@@ -1,4 +1,4 @@
-export const ValidateSignInForm = (email, password) => {
+export const ValidateSignInForm = (email, password, confirmPassword) => {
   const isValidEmail =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
       email
@@ -9,7 +9,10 @@ export const ValidateSignInForm = (email, password) => {
       password
     );
 
+  const isSameConfirmPassword = password === confirmPassword;
   if (!isValidEmail) return 'Email is not valid';
   if (!isValidPassword) return 'Password is not valid';
+  if (!isSameConfirmPassword)
+    return 'Password and confirm Password has Mismatch';
   return null;
 };
